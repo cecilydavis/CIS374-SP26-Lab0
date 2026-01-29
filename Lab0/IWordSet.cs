@@ -20,4 +20,6 @@ public interface IWordSet
     /// <summary>Up to k words in the inclusive lexigraphic range [lo, hi], sorted.</summary>
     IEnumerable<string> Range(string lo, string hi, int k);
 
+    int Count{get;}
+
 }

@@ -10,6 +10,8 @@ public sealed class HashWordSet : IWordSet
 {
     private HashSet<string> words = new();
 
+    public int Count ==> words.Count;
+
     public bool Add(string word)
     {
         var normalizedWord = Normalize(word);
