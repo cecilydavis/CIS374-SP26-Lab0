@@ -1,3 +1,4 @@
+namespace Lab0;
 // [ "ryan", "beau", "caleb", "rye", 
 // "beautiful", "cale", "cephas", "rhino", "cervid", "cecily"
 // "ethan" , "ethel"]
@@ -10,7 +11,7 @@ public sealed class HashWordSet : IWordSet
 {
     private HashSet<string> words = new();
 
-    public int Count ==> words.Count;
+    public int Count => words.Count;
 
     public bool Add(string word)
     {

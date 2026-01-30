@@ -1,3 +1,4 @@
+namespace Lab0;
 /// <summary>
 /// Interface for a word set that supports prefix/range queries
 /// and lexicographic neighbors (Next/Prev).
