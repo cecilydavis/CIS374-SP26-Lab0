@@ -43,7 +43,24 @@ public sealed class HashWordSet : IWordSet
     /// TODO
     public string? Prev(string word)
     {
-        throw new NotImplementedException();
+        var normalizedWord = Normalize(word);
+        if (normalizedWord.Length == 0)
+            return null;
+
+        string? best = null;
+
+    // look for a better best
+    foreach (var w in words)
+    {
+        // best < w && w < word
+        if (w.CompareTo(word) < 0
+            && (best is null || best.CompareTo(w) < 0))
+        {
+            best = w;
+        }
+    }
+
+    return best;
     }
 
     public string? Next(string word)
@@ -90,7 +107,23 @@ public sealed class HashWordSet : IWordSet
     /// TODO
     public IEnumerable<string> Range(string lo, string hi, int k)
     {
-        throw new NotImplementedException();
+        var normalizedLo = Normalize(lo);
+        var normalizedHi = Normalize(hi);
+
+        var results = new List<string>();
+
+    foreach (var word in words)
+    {
+        if (normalizedLo.CompareTo(word) <= 0
+            && word.CompareTo(normalizedHi) <= 0)
+        {
+            results.Add(word);
+        }
+    }
+
+    results.Sort();
+
+    return results.Slice(0, Math.Min(k, results.Count));
     }
     /// <summary>
     /// Normalize a word by trimming whitespace and converting to lowercase.

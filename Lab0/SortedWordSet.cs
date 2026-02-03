@@ -1,46 +1,72 @@
-
 namespace Lab0;
-"ce", ..."ce\uFFFF"
-// [ "ryan", "beau", "beautiful", "cale", "caleb", "cecily", "cephas", 
-//"cervid", "ethan", "ethel", "rhino", "ryan", "rye"]
+// [  "beau", "beautiful", "cale", "caleb","cecily", "cephas", "cervid" 
+// "ethan" , "ethel", "rhino", "ryan", "rye"]
 
 public class SortedWordSet : IWordSet
 {
-
     private SortedSet<string> words = new();
 
-    public int Count => words.Count;
+    public int Count =>  words.Count;
 
     public bool Add(string word)
     {
-        var normailzedWord = Normalize(word);
-        if(normailzedWord.Length ==0)
+        var normalizedWord = Normalize(word);
+        if( normalizedWord.Length == 0 ) 
             return false;
 
-        words.Add(normailzedWordword));
+        return words.Add(normalizedWord);
     }
 
     public bool Contains(string word)
     {
-        var normailzedWord = Normalize(word);
-        if(normailzedWord.Length ==0)
+        var normalizedWord = Normalize(word);
+        if( normalizedWord.Length == 0 ) 
             return false;
-            
-        words.Contains(normailzedWordword));
+
+        return words.Contains(normalizedWord);
+    }
+
+    public bool Remove(string word)
+    {
+        var normalizedWord = Normalize(word);
+        if( normalizedWord.Length == 0 ) 
+            return false;
+
+        return words.Remove(normalizedWord);
+    }
+
+    // TODO
+    public string? Prev(string word)
+    {
+        var normalizedWord = Normalize(word);
+        if( normalizedWord.Length == 0 || words.Count==0)
+            return null;
+
+        string? best = null;
+
+        foreach(var candidate in words.GetViewBetween("", normalizedWord))
+        {
+            if(candidate.CompareTo(normalizedWord) < 0)
+            {
+                best = candidate;
+            }
+    }
+
+    return best;
     }
 
     public string? Next(string word)
     {
-        var normalzedWord =Normalize(word);
-        if(normalzedWord.Length ==0 || words.Count==0)
+        var normalizedWord = Normalize(word);
+        if( normalizedWord.Length == 0 || words.Count==0)
             return null;
 
         //var wordsInRange = words.GetViewBetween("a", "m");
-        //words.GetViewBetween("charity", "\uFFFF\uFFFF\uFFFF")
+        //words.GetViewBetween("charity" , "\uFFFF\uFFFF\uFFFF")
 
-        foreach(var candidate in words.GetViewBetween(normalzedWord, MAX_STRING))
+        foreach(var candidate in words.GetViewBetween(normalizedWord, MAX_STRING))
         {
-            if(candidate.CompareTo(normalzedWord) > 0)
+            if(candidate.CompareTo(normalizedWord) > 0)
             {
                 return candidate;
             }
@@ -50,27 +76,25 @@ public class SortedWordSet : IWordSet
 
     public IEnumerable<string> Prefix(string prefix, int k)
     {
-        if(k <=0 || words.Count ==0 )
+        if(k <=0 || words.Count ==0 ) 
             return new List<string>();
 
         var results = new List<string>();
 
         var normalizedPrefix = Normalize(prefix);
 
-        string lo = "prefix";
-        string hi = "prefix"+"{";
-
+        // do the work
+        string lo = normalizedPrefix;
+        string hi = normalizedPrefix+"{";
+        
         int count = 0;
         lo = "ethan";
         hi = "ethan{";
 
         foreach( var candidate in words.GetViewBetween(lo, hi) )
         {
-
-
-
             results.Add(candidate);
-
+            
             count++;
             if(count >= k)
             {
@@ -80,25 +104,37 @@ public class SortedWordSet : IWordSet
 
         return results;
     }
+ 
 
-    public string? Prev(string word)
-    {
-        throw new NotImplementedException();
-    }
-
+    // TODO
     public IEnumerable<string> Range(string lo, string hi, int k)
     {
-        throw new NotImplementedException();
+        if(k <=0 || words.Count ==0 ) 
+        return new List<string>();
+
+    var results = new List<string>();
+
+    var normalizedLo = Normalize(lo);
+    var normalizedHi = Normalize(hi);
+
+    // do the work
+    int count = 0;
+
+    foreach( var candidate in words.GetViewBetween(normalizedLo, normalizedHi) )
+    {
+        results.Add(candidate);
+
+        count++;
+        if(count >= k)
+        {
+            return results;
+        }
     }
 
-    public bool Remove(string word)
-    {
-        var normailzedWord = Normalize(word);
-        if(normailzedWord.Length ==0)
-            return false;
-            
-        words.Remove(normailzedWordword);
-    }
+    return results;
+}
+
+
 
     /// <summary>
     /// Normalize a word by trimming whitespace and converting to lowercase.
@@ -114,5 +150,6 @@ public class SortedWordSet : IWordSet
         return word.Trim().ToLowerInvariant();
     }
 
-   private const string MAX_STRING = "\uFFFF\uFFFF\uFFFF";
+    private const string MAX_STRING = "\uFFFF\uFFFF\uFFFF";
+
 }

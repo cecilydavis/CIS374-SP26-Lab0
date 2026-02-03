@@ -1,23 +1,381 @@
-<Project Sdk="Microsoft.NET.Sdk">
+namespace Lab0.Tests;
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+[TestClass]
+public sealed class SortedWordSetTests
+{
+    [TestMethod]
+    public void TestAdd_NewWord_ReturnsTrue()
+    {
+        var wordSet = new SortedWordSet();
+        Assert.IsTrue(wordSet.Add("hello"));
+    }
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="MSTest" Version="3.6.4" />
-  </ItemGroup>
+    [TestMethod]
+    public void TestAdd_DuplicateWord_ReturnsFalse()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("hello");
+        Assert.IsFalse(wordSet.Add("hello"));
+    }
 
-  <ItemGroup>
-    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
-  </ItemGroup>
+    [TestMethod]
+    public void TestAdd_MultipleWords()
+    {
+        var wordSet = new SortedWordSet();
+        Assert.IsTrue(wordSet.Add("apple"));
+        Assert.IsTrue(wordSet.Add("banana"));
+        Assert.IsTrue(wordSet.Add("cherry"));
+        Assert.IsFalse(wordSet.Add("apple"));
+    }
 
-  <ItemGroup>
-    <ProjectReference Include="..\Lab0\Lab0.csproj" />
-  </ItemGroup>
+    [TestMethod]
+    public void TestContains_ExistingWord_ReturnsTrue()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("world");
+        Assert.IsTrue(wordSet.Contains("world"));
+    }
 
-</Project>
+    [TestMethod]
+    public void TestContains_NonExistingWord_ReturnsFalse()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("world");
+        Assert.IsFalse(wordSet.Contains("hello"));
+    }
+
+    [TestMethod]
+    public void TestContains_EmptySet_ReturnsFalse()
+    {
+        var wordSet = new SortedWordSet();
+        Assert.IsFalse(wordSet.Contains("anything"));
+    }
+
+    [TestMethod]
+    public void TestRemove_ExistingWord_ReturnsTrue()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("hey");
+        Assert.IsTrue(wordSet.Remove("hey"));
+        Assert.IsFalse(wordSet.Contains("hey"));
+    }
+
+    [TestMethod]
+    public void TestRemove_NonExistingWord_ReturnsFalse()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("what");
+        Assert.IsFalse(wordSet.Remove("missing"));
+    }
+
+    [TestMethod]
+    public void TestRemove_EmptySet_ReturnsFalse()
+    {
+        var wordSet = new SortedWordSet();
+        Assert.IsFalse(wordSet.Remove("anything"));
+    }
+
+    [TestMethod]
+    public void TestNext_ReturnsNextWord()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("ryan");
+
+        Assert.AreEqual("beau", wordSet.Next("apple"));
+        Assert.AreEqual("caleb", wordSet.Next("beau"));
+        Assert.AreEqual("ryan", wordSet.Next("caleb"));
+    }
+
+    [TestMethod]
+    public void TestNext_NoNextWord_ReturnsNull()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("apple");
+        wordSet.Add("banana");
+
+        Assert.IsNull(wordSet.Next("banana"));
+        Assert.IsNull(wordSet.Next("zebra"));
+    }
+
+    [TestMethod]
+    public void TestNext_EmptySet_ReturnsNull()
+    {
+        var wordSet = new SortedWordSet();
+        Assert.IsNull(wordSet.Next("anything"));
+    }
+
+    [TestMethod]
+    public void TestNext_WithSampleData()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("ryan");
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("rye");
+        wordSet.Add("beautiful");
+        wordSet.Add("cale");
+
+        Assert.AreEqual("beau", wordSet.Next("apple"));
+        Assert.AreEqual("beautiful", wordSet.Next("beau"));
+        Assert.AreEqual("cale", wordSet.Next("beautiful"));
+        Assert.AreEqual("caleb", wordSet.Next("cale"));
+        Assert.AreEqual("ryan", wordSet.Next("caleb"));
+        Assert.AreEqual("rye", wordSet.Next("ryan"));
+        Assert.IsNull(wordSet.Next("rye"));
+    }
+
+    [TestMethod]
+    public void TestPrefix_ReturnsMatchingWords()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("ryan");
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("cale");
+        wordSet.Add("carpet");
+        wordSet.Add("beautiful");
+        wordSet.Add("rye");
+
+
+        var results = wordSet.Prefix("ca", 10).ToList();
+        Assert.AreEqual(3, results.Count);
+        Assert.AreEqual("cale", results[0]);
+        Assert.AreEqual("caleb", results[1]);
+        Assert.AreEqual("carpet", results[2]);
+    }
+
+    [TestMethod]
+    public void TestPrefix_LimitResults()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("apple");
+        wordSet.Add("application");
+        wordSet.Add("apply");
+        wordSet.Add("appreciate");
+        wordSet.Add("ryan");
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("cale");
+        wordSet.Add("carpet");
+        wordSet.Add("beautiful");
+        wordSet.Add("rye");
+
+        var results = wordSet.Prefix("app", 2).ToList();
+        Assert.AreEqual(2, results.Count);
+        Assert.AreEqual("apple", results[0]);
+        Assert.AreEqual("application", results[1]);
+    }
+
+    [TestMethod]
+    public void TestPrefix_NoMatches_ReturnsEmpty()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("hello");
+        wordSet.Add("world");
+
+        var results = wordSet.Prefix("xyz", 10).ToList();
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [TestMethod]
+    public void TestPrefix_EmptyPrefix_ReturnsAllWordsSorted()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("zebra");
+        wordSet.Add("apple");
+        wordSet.Add("mango");
+
+        var results = wordSet.Prefix("", 10).ToList();
+        Assert.AreEqual(3, results.Count);
+        Assert.AreEqual("apple", results[0]);
+        Assert.AreEqual("mango", results[1]);
+        Assert.AreEqual("zebra", results[2]);
+    }
+
+    [TestMethod]
+    public void TestPrefix_RequestMoreThanAvailable()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("cat");
+        wordSet.Add("car");
+
+        var results = wordSet.Prefix("ca", 100).ToList();
+        Assert.AreEqual(2, results.Count);
+    }
+
+    [TestMethod]
+    public void TestPrefix_WithSampleData()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("ryan");
+        wordSet.Add("rhino");
+        wordSet.Add("rye");
+        wordSet.Add("cecily");
+        wordSet.Add("cervid");
+        wordSet.Add("cephas");
+
+        var results = wordSet.Prefix("r", 10).ToList();
+        Assert.AreEqual(3, results.Count);
+        Assert.AreEqual("rhino", results[0]);
+        Assert.AreEqual("ryan", results[1]);
+        Assert.AreEqual("rye", results[2]);
+
+        var cResults = wordSet.Prefix("ce", 2).ToList();
+        Assert.AreEqual(2, cResults.Count);
+        Assert.AreEqual("cecily", cResults[0]);
+        Assert.AreEqual("cephas", cResults[1]);
+    }
+
+    [TestMethod]
+    public void TestPrev_ReturnsPreviousWord()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("ryan");
+
+        Assert.AreEqual("caleb", wordSet.Prev("ryan"));
+        Assert.AreEqual("beau", wordSet.Prev("caleb"));
+    }
+
+    [TestMethod]
+    public void TestPrev_NoPreviousWord_ReturnsNull()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("banana");
+        wordSet.Add("cherry");
+
+        Assert.IsNull(wordSet.Prev("apple"));
+        Assert.IsNull(wordSet.Prev("banana"));
+    }
+
+    [TestMethod]
+    public void TestPrev_EmptySet_ReturnsNull()
+    {
+        var wordSet = new SortedWordSet();
+        Assert.IsNull(wordSet.Prev("anything"));
+    }
+
+    [TestMethod]
+    public void TestPrev_WithSampleData()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("ryan");
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("rye");
+        wordSet.Add("beautiful");
+        wordSet.Add("cale");
+
+        Assert.IsNull(wordSet.Prev("beau"));
+        Assert.AreEqual("beau", wordSet.Prev("beautiful"));
+        Assert.AreEqual("beautiful", wordSet.Prev("cale"));
+        Assert.AreEqual("cale", wordSet.Prev("caleb"));
+        Assert.AreEqual("caleb", wordSet.Prev("ryan"));
+        Assert.AreEqual("ryan", wordSet.Prev("rye"));
+        Assert.AreEqual("rye", wordSet.Prev("zebra"));
+    }
+
+    [TestMethod]
+    public void TestRange_ReturnsWordsInRange()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("apple");
+        wordSet.Add("banana");
+        wordSet.Add("cherry");
+        wordSet.Add("date");
+        wordSet.Add("elderberry");
+
+        var results = wordSet.Range("banana", "elderberry", 10).ToList();
+        Assert.AreEqual(4, results.Count);
+        Assert.AreEqual("banana", results[0]);
+        Assert.AreEqual("cherry", results[1]);
+        Assert.AreEqual("date", results[2]);
+        Assert.AreEqual("elderberry", results[3]);
+    }
+
+    [TestMethod]
+    public void TestRange_IncludesBoundaries()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("apple");
+        wordSet.Add("banana");
+        wordSet.Add("cherry");
+
+        var results = wordSet.Range("apple", "cherry", 10).ToList();
+        Assert.AreEqual(3, results.Count);
+        Assert.AreEqual("apple", results[0]);
+        Assert.AreEqual("banana", results[1]);
+        Assert.AreEqual("cherry", results[2]);
+    }
+
+    [TestMethod]
+    public void TestRange_LimitResults()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("apple");
+        wordSet.Add("banana");
+        wordSet.Add("cherry");
+        wordSet.Add("date");
+
+        var results = wordSet.Range("apple", "date", 2).ToList();
+        Assert.AreEqual(2, results.Count);
+        Assert.AreEqual("apple", results[0]);
+        Assert.AreEqual("banana", results[1]);
+    }
+
+    [TestMethod]
+    public void TestRange_NoMatches_ReturnsEmpty()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("apple");
+        wordSet.Add("cherry");
+
+        var results = wordSet.Range("dog", "fox", 10).ToList();
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [TestMethod]
+    public void TestRange_EmptySet_ReturnsEmpty()
+    {
+        var wordSet = new SortedWordSet();
+        var results = wordSet.Range("a", "z", 10).ToList();
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [TestMethod]
+    public void TestRange_WithSampleData()
+    {
+        var wordSet = new SortedWordSet();
+        wordSet.Add("ryan");
+        wordSet.Add("beau");
+        wordSet.Add("caleb");
+        wordSet.Add("rye");
+        wordSet.Add("beautiful");
+        wordSet.Add("cale");
+        wordSet.Add("cephas");
+        wordSet.Add("rhino");
+        wordSet.Add("cervid");
+        wordSet.Add("cecily");
+        wordSet.Add("ethan");
+        wordSet.Add("ethel");
+
+        var results = wordSet.Range("cale", "ethel", 10).ToList();
+      Assert.AreEqual(7, results.Count);
+      Assert.AreEqual("cale", results[0]);
+      Assert.AreEqual("caleb", results[1]);
+      Assert.AreEqual("cecily", results[2]);
+      Assert.AreEqual("cephas", results[3]);
+      Assert.AreEqual("cervid", results[4]);
+      Assert.AreEqual("ethan", results[5]);
+      Assert.AreEqual("ethel", results[6]);
+
+        var limited = wordSet.Range("beau", "rye", 3).ToList();
+        Assert.AreEqual(3, limited.Count);
+        Assert.AreEqual("beau", limited[0]);
+        Assert.AreEqual("beautiful", limited[1]);
+        Assert.AreEqual("cale", limited[2]);
+    }
+}
